@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.local
+
+# Persistent local data (Do not commit actual user data)
+data/courses.json
+data/*.tmp
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+npm-debug.log*

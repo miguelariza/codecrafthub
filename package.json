@@ -1,0 +1,28 @@
+{
+  "name": "codecrafthub",
+  "version": "1.0.0",
+  "description": "Personal learning goal tracker API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "audit": "npm audit --omit=dev"
+  },
+  "keywords": [
+    "express",
+    "rest-api",
+    "learning-tracker",
+    "json-database",
+    "security-hardened",
+    "zero-dev-dependencies"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0"
+  }
+}
