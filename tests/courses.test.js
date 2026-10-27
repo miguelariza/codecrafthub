@@ -2,19 +2,36 @@ process.env.NODE_ENV = 'test';
 
 const { test, describe, before, after, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
+const path = require('path');
+const fs = require('fs/promises');
+
+// Isolate test database to a dedicated directory
+const TEST_DATA_DIR = path.join(__dirname, '../data');
+const TEST_FILE_PATH = path.join(TEST_DATA_DIR, 'courses.json');
+
 const app = require('../src/app');
-const fileHandler = require('../src/utils/fileHandler');
-const { StorageError } = require('../src/errors/appErrors');
 
 describe('CodeCraftHub Full Test Suite (Native node:test runner)', () => {
   let server;
   let baseUrl;
-  let mockStore = [];
 
-  // Start an ephemeral test server on an open OS port
+  const initialCourses = [
+    {
+      id: 'course_test_1',
+      name: 'Node Fundamentals',
+      description: 'Express and JSON storage',
+      targetDate: '2026-12-01',
+      status: 'In Progress',
+      created_at: '2026-10-01T00:00:00.000Z',
+      updated_at: '2026-10-01T00:00:00.000Z'
+    }
+  ];
+
+  // 1. Start ephemeral HTTP server on open port
   before(async () => {
+    await fs.mkdir(TEST_DATA_DIR, { recursive: true });
     await new Promise((resolve) => {
-      server = app.listen(0, () => {
+      server = app.listen(0, '127.0.0.1', () => {
         const port = server.address().port;
         baseUrl = `http://127.0.0.1:${port}/api/courses`;
         resolve();
@@ -22,31 +39,24 @@ describe('CodeCraftHub Full Test Suite (Native node:test runner)', () => {
     });
   });
 
-  // Close the server when test run completes
+  // 2. Clean up test server and test storage file
   after(async () => {
     await new Promise((resolve) => server.close(resolve));
+    try {
+      await fs.unlink(TEST_FILE_PATH);
+    } catch {
+      // Ignore if file was already removed
+    }
   });
 
-  beforeEach(() => {
-    mockStore = [
-      {
-        id: 'course_test_1',
-        name: 'Node Fundamentals',
-        description: 'Express and JSON storage',
-        targetDate: '2026-12-01',
-        status: 'In Progress',
-        created_at: '2026-10-01T00:00:00.000Z',
-        updated_at: '2026-10-01T00:00:00.000Z'
-      }
-    ];
-
-    // Mock file operations with pure native JS functions
-    fileHandler.readCourses = async () => [...mockStore];
-    fileHandler.writeCourses = async (data) => {
-      mockStore = [...data];
-    };
+  // 3. Reset disk state to predictable fixture before each test
+  beforeEach(async () => {
+    await fs.writeFile(TEST_FILE_PATH, JSON.stringify(initialCourses, null, 2), 'utf-8');
   });
 
+  // -------------------------------------------------------------------------
+  // Happy Paths & Security Headers
+  // -------------------------------------------------------------------------
   describe('Happy Paths & Security Headers', () => {
     test('GET /api/courses returns course list with Helmet headers and no x-powered-by', async () => {
       const res = await fetch(baseUrl);
@@ -106,9 +116,16 @@ describe('CodeCraftHub Full Test Suite (Native node:test runner)', () => {
     test('DELETE /api/courses/:id removes the course', async () => {
       const res = await fetch(`${baseUrl}/course_test_1`, { method: 'DELETE' });
       assert.equal(res.status, 204);
+
+      // Verify deletion from disk
+      const checkRes = await fetch(`${baseUrl}/course_test_1`);
+      assert.equal(checkRes.status, 404);
     });
   });
 
+  // -------------------------------------------------------------------------
+  // Error Handling Validation
+  // -------------------------------------------------------------------------
   describe('Error Handling Validation', () => {
     test('POST returns 400 when name is missing', async () => {
       const res = await fetch(baseUrl, {
@@ -148,7 +165,7 @@ describe('CodeCraftHub Full Test Suite (Native node:test runner)', () => {
     });
 
     test('GET returns 404 for unknown ID', async () => {
-      const res = await fetch(`${baseUrl}/unknown_id`);
+      const res = await fetch(`${baseUrl}/unknown_id_999`);
       const data = await res.json();
 
       assert.equal(res.status, 404);
@@ -156,15 +173,15 @@ describe('CodeCraftHub Full Test Suite (Native node:test runner)', () => {
     });
 
     test('GET returns 500 when storage file is corrupted', async () => {
-      fileHandler.readCourses = async () => {
-        throw new StorageError('Storage corrupted: courses.json contains malformed JSON data');
-      };
+      // Intentionally write invalid JSON to the disk storage file
+      await fs.writeFile(TEST_FILE_PATH, '{ corrupted-json-data: ', 'utf-8');
 
       const res = await fetch(baseUrl);
       const data = await res.json();
 
       assert.equal(res.status, 500);
-      assert.match(data.error, /Storage corrupted/);
+      assert.equal(data.success, false);
+      assert.match(data.error, /corrupted/i);
     });
   });
 });
