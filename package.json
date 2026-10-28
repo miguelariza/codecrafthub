@@ -7,7 +7,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test tests/courses.test.js",
-    "audit": "npm audit --omit=dev"
+    "audit": "npm audit --omit=dev",
+    "test:ui": "vitest run tests/spa.test.js"
   },
   "keywords": [
     "express",
@@ -24,5 +25,9 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.5"
   }
 }

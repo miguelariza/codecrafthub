@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self';
+                 base-uri 'self';
+                 form-action 'self';
+                 frame-ancestors 'none';
+                 connect-src 'self' http://localhost:5000 http://127.0.0.1:5000;
+                 font-src https://fonts.gstatic.com;
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 style-src-attr 'self' 'unsafe-inline';
+                 script-src 'self' 'unsafe-inline';
+                 script-src-elem 'self' 'unsafe-inline';
+                 script-src-attr 'none';
+                 img-src 'self' data:;" />
+
+  <title>CodeCraftHub: Your Learning Management Platform</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --nord0: #2e3440;
+      --nord1: #3b4252;
+      --nord2: #434c5e;
+      --nord3: #4c566a;
+      --nord4: #d8dee9;
+      --nord5: #e5e9f0;
+      --nord6: #eceff4;
+      --nord7: #8fbcbb;
+      --nord8: #88c0d0;
+      --nord9: #81a1c1;
+      --nord10: #5e81ac;
+      --nord11: #bf616a;
+      --nord12: #d08770;
+      --nord13: #ebcb8b;
+      --nord14: #a3be8c;
+      --nord15: #b48ead;
+
+      --font-interface: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-code: 'JetBrains Mono', "Fira Code", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --shadow-subtle: 0 4px 18px rgba(0, 0, 0, 0.28);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-interface);
+      background-color: var(--nord0);
+      color: var(--nord4);
+      line-height: 1.5;
+      padding: 2.5rem 1.5rem;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .u-hidden { display: none !important; }
+    .u-text-right { text-align: right; }
+    .u-margin-top-xs { margin-top: 0.35rem; }
+    .u-margin-bottom-sm { margin-bottom: 1rem; }
+    .u-margin-bottom-md { margin-bottom: 1.25rem; }
+    .u-emphasis-white { color: var(--nord6); }
+
+    header.header {
+      margin-bottom: 2.2rem;
+      text-align: center;
+    }
+
+    header.header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--nord6);
+      letter-spacing: -0.025em;
+      margin-bottom: 0.35rem;
+    }
+
+    header.header h1 span { color: var(--nord8); }
+    header.header p { font-size: 0.95rem; color: var(--nord9); }
+
+    .panel {
+      background-color: var(--nord1);
+      border: 1px solid var(--nord2);
+      border-radius: var(--radius-md);
+      padding: 1.6rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--nord2);
+      padding-bottom: 0.75rem;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--nord5);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .course-counter {
+      font-family: var(--font-code);
+      background: var(--nord2);
+      color: var(--nord8);
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+    }
+
+    .form-group-full { grid-column: span 2; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--nord5);
+    }
+
+    label .req {
+      color: var(--nord11);
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--nord0);
+      border: 1px solid var(--nord3);
+      border-radius: var(--radius-sm);
+      color: var(--nord6);
+      font-family: var(--font-interface);
+      font-size: 0.95rem;
+      padding: 0.65rem 0.8rem;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    input[type="date"] { font-family: var(--font-code); }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--nord8);
+      box-shadow: 0 0 0 2px rgba(136, 192, 208, 0.25);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-interface);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      gap: 0.4rem;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background-color: var(--nord8); color: var(--nord0); }
+    .btn-primary:hover:not(:disabled) { background-color: var(--nord7); }
+    .btn-success { background-color: var(--nord14); color: var(--nord0); }
+    .btn-success:hover:not(:disabled) { filter: brightness(1.08); }
+    .btn-secondary { background-color: var(--nord2); color: var(--nord5); }
+    .btn-secondary:hover:not(:disabled) { background-color: var(--nord3); }
+    .btn-danger { background-color: var(--nord11); color: #fff; }
+    .btn-danger:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.78rem; }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      background-color: var(--nord0);
+      border: 1px solid var(--nord2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--nord2);
+      color: var(--nord5);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+    }
+
+    .col-course { width: 32%; }
+    .col-status { width: 14%; }
+    .col-target { width: 16%; }
+    .col-meta   { width: 20%; }
+    .col-actions{ width: 18%; }
+
+    td {
+      padding: 0.95rem 1rem;
+      border-bottom: 1px solid var(--nord2);
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: rgba(67, 76, 94, 0.3); }
+
+    .course-title-cell { font-weight: 600; color: var(--nord6); }
+    .course-desc-cell {
+      color: var(--nord4);
+      font-size: 0.83rem;
+      margin-top: 0.25rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .mono-meta {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      color: var(--nord9);
+      display: block;
+    }
+
+    .meta-date {
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      color: var(--nord5);
+      white-space: nowrap;
+    }
+
+    .status-pill {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      display: inline-block;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .status-not-started {
+      background: rgba(143, 188, 187, 0.15);
+      color: var(--nord7);
+      border: 1px solid rgba(143, 188, 187, 0.4);
+    }
+
+    .status-in-progress {
+      background: rgba(208, 135, 112, 0.2);
+      color: var(--nord12);
+      border: 1px solid rgba(208, 135, 112, 0.5);
+    }
+
+    .status-completed {
+      background: rgba(163, 190, 140, 0.15);
+      color: var(--nord14);
+      border: 1px solid rgba(163, 190, 140, 0.4);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--nord9);
+    }
+
+    .empty-state-icon { font-size: 2rem; }
+    .empty-state p { font-size: 1rem; margin-top: 0.5rem; color: var(--nord4); }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
+
+    .loading-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      gap: 0.75rem;
+      color: var(--nord8);
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #toast-container {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 400px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: var(--nord1);
+      border-left: 4px solid var(--nord8);
+      color: var(--nord6);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: slideIn 0.25s ease-out;
+    }
+
+    .toast.success { border-left-color: var(--nord14); }
+    .toast.error { border-left-color: var(--nord11); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .banner {
+      display: none;
+      padding: 0.8rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+      font-weight: 500;
+    }
+
+    .banner.error {
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(191, 97, 106, 0.15);
+      border: 1px solid var(--nord11);
+      color: #ffadb4;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(46, 52, 64, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-dialog {
+      background: var(--nord1);
+      border: 1px solid var(--nord2);
+      border-radius: var(--radius-md);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 580px;
+      overflow: hidden;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-dialog.modal-dialog-sm { max-width: 440px; }
+
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--nord2);
+      background: var(--nord0);
+    }
+
+    .modal-header h2 { font-size: 1.15rem; color: var(--nord6); }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--nord4);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .close-btn:hover { color: var(--nord6); }
+    .modal-body { padding: 1.4rem; }
+
+    @media (max-width: 768px) {
+      body { padding: 1.2rem 0.8rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group-full { grid-column: span 1; }
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tr {
+        background: var(--nord0);
+        border: 1px solid var(--nord2);
+        border-radius: var(--radius-sm);
+        margin-bottom: 1rem;
+        padding: 1rem;
+      }
+      td {
+        padding: 0.45rem 0;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--nord9);
+        font-weight: 600;
+      }
+      .table-actions {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--nord2);
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="container">
+    <header class="header">
+      <h1><span>CodeCraftHub:</span> Your Learning Management Platform</h1>
+      <p>Track, manage, and execute your software engineering learning milestones.</p>
+    </header>
+
+    <div id="api-error-banner" class="banner error">
+      <span id="api-error-message">Failed to communicate with backend.</span>
+      <button type="button" class="btn btn-sm btn-secondary" id="btn-retry-banner">Retry</button>
+    </div>
+
+    <!-- Add Course Form -->
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Add New Course Goal</h2>
+      </div>
+
+      <form id="add-course-form" novalidate>
+        <div class="form-grid">
+          <div class="form-group form-group-full">
+            <label for="new-name">Course Name <span class="req">*</span></label>
+            <input type="text" id="new-name" placeholder="e.g., Advanced Distributed Systems with Go" required />
+          </div>
+
+          <div class="form-group form-group-full">
+            <label for="new-description">Description <span class="req">*</span></label>
+            <textarea id="new-description" placeholder="Short description of concepts, syllabi, or learning targets..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="new-target-date">Target Completion Date (Must be future) <span class="req">*</span></label>
+            <input type="date" id="new-target-date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="new-status">Initial Status <span class="req">*</span></label>
+            <select id="new-status" required>
+              <option value="Not Started" selected>Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success" id="btn-add-course">
+            <span>Add Course</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Course List -->
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">
+          <span>Active Learning Goals</span>
+          <span class="course-counter" id="course-count">0 courses</span>
+        </h2>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-refresh">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div class="table-container">
+        <div id="table-loader" class="loading-overlay u-hidden">
+          <div class="spinner spinner-lg"></div>
+          <span>Fetching course catalog from API...</span>
+        </div>
+
+        <table id="courses-table" class="u-hidden">
+          <thead>
+            <tr>
+              <th class="col-course">Course</th>
+              <th class="col-status">Status</th>
+              <th class="col-target">Target Date</th>
+              <th class="col-meta">Timestamps</th>
+              <th class="col-actions u-text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="courses-body"></tbody>
+        </table>
+
+        <div id="empty-state" class="empty-state u-hidden">
+          <div class="empty-state-icon">📚</div>
+          <p>No learning goals recorded yet. Add your first course above!</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Edit Course Modal -->
+  <div class="modal-backdrop" id="edit-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Edit Course Goal</h2>
+        <button type="button" class="close-btn" id="btn-close-edit" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="edit-course-form" class="modal-body" novalidate>
+        <input type="hidden" id="edit-id" />
+        
+        <div class="form-group u-margin-bottom-sm">
+          <label>Course ID</label>
+          <span class="mono-meta" id="edit-id-display">--</span>
+        </div>
+
+        <div class="form-group u-margin-bottom-sm">
+          <label for="edit-name">Course Name <span class="req">*</span></label>
+          <input type="text" id="edit-name" required />
+        </div>
+
+        <div class="form-group u-margin-bottom-sm">
+          <label for="edit-description">Description <span class="req">*</span></label>
+          <textarea id="edit-description" rows="3" required></textarea>
+        </div>
+
+        <div class="form-grid u-margin-bottom-md">
+          <div class="form-group">
+            <label for="edit-target-date">Target Date <span class="req">*</span></label>
+            <input type="date" id="edit-target-date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-status">Status <span class="req">*</span></label>
+            <select id="edit-status" required>
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-edit">
+            <span>Save Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal-backdrop" id="delete-modal">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+        <button type="button" class="close-btn" id="btn-close-delete" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="u-margin-bottom-md">
+          Are you sure you want to remove <strong id="delete-course-name" class="u-emphasis-white"></strong>? This operation cannot be reversed.
+        </p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+          <button type="button" class="btn btn-danger" id="btn-confirm-delete">Delete Course</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="/client.js"></script>
+</body>
+</html>
