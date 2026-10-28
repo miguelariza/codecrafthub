@@ -4,6 +4,8 @@ A lightweight REST API built with Node.js and Express to track learning roadmaps
 
 Tested entirely using Node.js built-in `node:test` and `node:assert/strict` modules—completely eliminating `jest`, `supertest`, `glob`, and `inflight` warnings.
 
+### This project was built completely using Gemini Pro 3.8 (Backend (Node.js) and UI interface (HTML, CSS, JS)
+
 ---
 
 ## Benefits of Native Node Test Runner
